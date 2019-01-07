@@ -13,7 +13,7 @@ behaviour = """{
   "updatefiles": true ,
   "shebang": 
   {
-    "she":["#!/","!#/bin","!#/usr/bin"],
+    "she":["#!/","#!/bin","#!/usr/bin"],
     "check": true
   },
   "oldCopyright":
@@ -50,7 +50,7 @@ behaviour = """{
      },
      {
        "brief":"html/js Code",
-        "extentions":[".html",".js"],
+        "extentions":[".html"],
         "names":[],
         "copyright":[
           "<!-- @author your Comparny , Address, Country                               -->",
