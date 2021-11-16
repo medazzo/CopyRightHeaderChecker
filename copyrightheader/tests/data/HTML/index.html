@@ -1,0 +1,58 @@
+<!DOCTYPE>
+<html>
+
+<head>
+    <title>fjplayer demo</title>
+    <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+    <div class="container containerma  ">
+        <div class=" panel-body row"></div>
+        <div class=" panel-body row">
+            <div class="col-md-10">
+            <form>
+                <div class="form-group">
+                    <select class="form-control" id="datasel" onchange="updateDataSet();">
+                        <option selected>Select Dataset to use </option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        </div>
+        <div class=" panel-body row">
+            <div class=" col-md-4">
+                <div class="form-group row">
+                    <div class="col-md-10">
+                        <form>
+                            <div class="form-group">
+                                <select class="form-control" id="Mainsel" onchange="updateItemChoice();">
+                                    <option selected>Select item to play </option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class=" col-md-2 ">
+                        <button type="button" class="btn btn-info" onclick="playfromList();"> play Video </button>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <textarea id="itemToplay" rows="10" class="form-control"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+
+                <div id="playercontainer"></div>
+
+            </div>
+        </div>
+    </div>
+    <!-- /container -->
+</body>
+    <script type="text/javascript" src="../dist/fjplayer.js"></script>
+    <script type="text/javascript" src="./index.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+</html>

@@ -1,0 +1,17 @@
+language: cpp
+dist: bionic
+compiler:
+- cmake
+addons:
+  apt:
+    update: true
+script:
+  - mkdir build-FIFO
+  - cd build-FIFO
+  - cmake ..
+  - make
+  - cd ..
+  - mkdir build-MQ
+  - cd build-MQ
+  - cmake -DUSE_MESSAGE_QUEUE=ON ..
+  - make

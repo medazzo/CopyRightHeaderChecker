@@ -78,20 +78,16 @@ def parse_args(args):
         prog="checker",
     )
     parser.add_argument("--version", action="version", version=version)
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        dest="verbose",
-        help="enable verbose mode",
+    subparsers = parser.add_subparsers(help="main action")
+    process_info = subparsers.add_parser("info", help="display informations")
+    process_info.add_argument(
+        "-d",
+        "--display",
+        dest="display",
+        choices=["all", "short"],
+        required=True,
+        help="print informations",
     )
-    parser.add_argument(
-        "--info",
-        action="store_true",
-        dest="info",
-        help="print checker information",
-    )
-
-    subparsers = parser.add_subparsers()
     process_parser = subparsers.add_parser("process", help="process checker")
     process_parser.add_argument(
         "-r",
@@ -153,18 +149,12 @@ def parse_args(args):
 
 
 def main(args):
-    print(
-        "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-    )
-    print(
-        "- - - - - - - - - - - - - - - - - -   Copyright Header  - - - - - - - - - - - - - - - - - - - - -"
-    )
-    print("")
     args = parse_args(args)
     setup_logging(logging.DEBUG)
-    if args.info:
+    if args.display == "all":
         Conf().info()
-
+    elif args.display == "short":
+        Conf().short_info()
     else:
         conf = Conf(
             args.report,
