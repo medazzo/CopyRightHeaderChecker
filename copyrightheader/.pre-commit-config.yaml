@@ -27,4 +27,4 @@ repos:
     rev: v0.910-1
     hooks:
     -   id: mypy
-        exclude: ^docs/|^copyrightheader/tests/data/SCRIPTS/easinAnalyser.py
+        exclude: ^copyrightheader/docs/|^copyrightheader/tests/data
