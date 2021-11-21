@@ -1,3 +1,6 @@
+import os
+
+
 class Header:
     """Header class"""
 
@@ -21,17 +24,18 @@ class Header:
     def info(self):
         print("")
         print("----------------------------------------")
-        print("* Header checker         : ", self.brief)
+        print("* Header brief           : ", self.brief)
         print("* Header extensions      : ", self.extensions)
         print("* Header fileNames       : ", self.fileNames)
-        print("* Header copyrightHeader :  ")
-        for line in self.copyrightHeader:
-            print(self.startLine, line, self.endLine)
+        print("* Header startLine       : ", self.startLine)
+        print("* Header endLine         : ", self.endLine)
 
     def findFile(self, filename):
         """return True if filename will be managed with this header"""
         # Check if file is in names
-        if filename in self.fileNames:
+        head, tail = os.path.split(filename)
+        print("  - - -	=> ", head, " / ", tail)
+        if tail in self.fileNames:
             self.filesManaged.append(filename)
             return True
         for ext in self.extensions:

@@ -14,7 +14,6 @@ def test_info_short(capsys):
     main(["info", "-d", "short"])
     captured = capsys.readouterr()
     assert "Reporting is enabled :  True" in captured.out
-    assert "Reporting is enabled :  True" in captured.out
     assert "Files are updated    :  True" in captured.out
     assert "Check Shebang        :  True" in captured.out
     assert "Warn on old Header   :  True" in captured.out
@@ -37,7 +36,6 @@ def test_info_all(capsys):
     main(["info", "-d", "all"])
     captured = capsys.readouterr()
     assert "Reporting is enabled :  True" in captured.out
-    assert "Reporting is enabled :  True" in captured.out
     assert "Files are updated    :  True" in captured.out
     assert "Check Shebang        :  True" in captured.out
     assert "Warn on old Header   :  True" in captured.out
@@ -45,3 +43,27 @@ def test_info_all(capsys):
     assert "Header extensions" in captured.out
     assert "Header fileNames" in captured.out
     assert "Header copyrightHeader " in captured.out
+
+
+def test_process(capsys):
+    """CLI Tests"""
+    # capsys is a pytest fixture that allows asserts agains stdout/stderr
+    # https://docs.pytest.org/en/stable/capture.html
+    main(
+        [
+            "process",
+            "-r",
+            "-n",
+            "NAMECOMPANY",
+            "-a",
+            "ADDRESSCOMPANY",
+            "-c",
+            "COUNTRYCOMPANY",
+            "-y",
+            "YEARCOMPANY",
+            "-i",
+            "tests/data/CPP",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert "Reporting is enabled :  True" in captured.out

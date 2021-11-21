@@ -25,6 +25,7 @@ import sys
 
 import pkg_resources  # part of setuptools
 
+from copyrightheader.analyser import Analyser
 from copyrightheader.configuration import Conf
 
 __author__ = "Mohamed Azzouni"
@@ -151,11 +152,13 @@ def parse_args(args):
 def main(args):
     args = parse_args(args)
     setup_logging(logging.DEBUG)
-    if args.display == "all":
-        Conf().info()
-    elif args.display == "short":
-        Conf().short_info()
+    if hasattr(args, "display"):
+        if args.display == "all":
+            Conf().info()
+        else:
+            Conf().short_info()
     else:
+        _logger.debug("Starting calculations...")
         conf = Conf(
             args.report,
             args.update,
@@ -167,9 +170,10 @@ def main(args):
             args.inputFolder,
         )
         conf.short_info()
-
-    _logger.debug("Starting crazy calculations...")
-    _logger.info("Script ends here")
+        dryRun = not args.update
+        analyser = Analyser(args.inputFolder, dryRun, conf)
+        analyser.process()
+        _logger.info("Script ends here")
 
 
 def run():

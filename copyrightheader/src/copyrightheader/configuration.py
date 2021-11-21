@@ -20,6 +20,7 @@ class Conf:
     ):
         self.inputFolder = inputFolder
         self.yearCompany = yearCompany
+        self.newCopyrightHeader = ""
         self.countryCompany = countryCompany
         self.addressCompany = addressCompany
         self.nameCompany = nameCompany
@@ -30,23 +31,21 @@ class Conf:
         self.warnOldHeader = True
         self.excludeDirs = [".git", ".repo"]
         self.shebangs = ["#!/", "#!/bin", "#!/usr/bin"]
-        self.oldNumberOfLines = 6
-        self.filesAlreadyCopyright = []
         self.copyrightHeader = [
             " @author $$CompanyName$$ , $$CompanyAddress$$, $$CompanyCountry$$",
             " ",
             " @copyright $$CompanyYear$$ $$CompanyName$$",
-            " All rights exclusively reserved for $$CompanyName$$,",
+            " All rights exclusively reserved for $$CompanyName$$",
             " unless otherwise expressly agreed",
-            "",
+            " ",
         ]
         self.headersCheck = [
             {
                 "brief": "C/C++ Code",
-                "extensions": [".c", ".cpp", ".h", ".hpp"],
+                "extensions": [".c", ".cpp", ".h", ".hpp", ".java", ".js"],
                 "names": [],
-                "startLine": "///",
-                "endLine": "",
+                "startLine": "/**",
+                "endLine": "*/",
             },
             {
                 "brief": "bash/scripting Code",
@@ -62,8 +61,12 @@ class Conf:
                     ".init",
                     ".py",
                     ".pl",
+                    ".yml",
+                    ".yaml",
                 ],
                 "names": [
+                    "requirements.txt",
+                    "CMakeLists.txt",
                     "init",
                     "run-ptest",
                     "llvm-config",
@@ -76,8 +79,8 @@ class Conf:
                 "endLine": "",
             },
             {
-                "brief": "html/js Code",
-                "extensions": [".html"],
+                "brief": "html/xml Code",
+                "extensions": [".html", ".xml"],
                 "names": [],
                 "startLine": "<!--",
                 "endLine": "-->",
@@ -126,38 +129,18 @@ class Conf:
         for h in self.headers:
             h.info()
 
-    def checkfileCopyright(self, filename):
-        """return true if file has already a Copyright in first X lines"""
-        infile = open(filename)
-        for x in xrange(self.oldNumberOfLines):
-            line = infile.readline()
-            if "Copyright" in line or "copyright" in line:
-                self.filesAlreadyCopyright.append(filename)
-                return True
-        return False
-
     def checkfileShebang(self, filename):
         """return true if file has a shebang"""
-        print("  Will check shebang  .. ")
         infile = open(filename)
         firstLine = infile.readline()
         infile.close()
         for she in self.shebangs:
-            print(
-                "??  did file ",
-                filename,
-                " start with ",
-                she,
-                " [",
-                firstLine,
-                "] ",
-            )
             if firstLine.startswith(she):
                 return True
         return False
 
-    def ApplyCopyright(self, srcfile, dstfile):
-        """will apply new Copyright on dst file then append the old src file"""
+    def GenerateNewCopyright(self):
+        """will get the new CopyrightHeader"""
         # apply company information
         copyright = self.copyrightHeader
         copyright = [
@@ -174,37 +157,41 @@ class Conf:
         copyright = [
             w.replace("$$CompanyYear$$", self.yearCompany) for w in copyright
         ]
+        # update header
+        maxline = max(copyright, key=len)
+        maxl = len(maxline) + 1
+        for i, w in enumerate(copyright):
+            offset = maxl - len(w)
+            wf = " " * offset
+            w = w + wf
+            copyright[i] = w
 
-        if srcfile != dstfile:
-            # create dir file if not exist
-            nbase = os.path.dirname(dstfile)
-            if not os.path.exists(nbase):
-                os.makedirs(nbase)
-            tmpd = dstfile
-        else:
-            tmp = "/tmp/tmp-fheadercopyrightLicense"
+        self.newCopyrightHeader = copyright
 
-        dst = open(tmp, "w")
-        isSheb = self.checkfileShebang(srcfile)
-        src = open(srcfile)
+    def ApplyCopyright(self, oldfile, newfile, header):
+        dst = open(newfile, "w")
+        isSheb = self.checkfileShebang(oldfile)
+        src = open(oldfile)
+        newheader = self.newCopyrightHeader
         if isSheb:
             line = src.readline()
             dst.write(line)
-            for cop in copyright:
+            for cop in newheader:
+                dst.write(header.startLine)
                 dst.write(cop)
+                dst.write(header.endLine)
                 dst.write("\n")
             # continue copy src file
             while line:
                 line = src.readline()
                 dst.write(line)
         else:
-            print(" \t ==>  file  ", srcfile, " DONT have shebang !")
-            for cop in copyright:
+            for cop in newheader:
+                dst.write(header.startLine)
                 dst.write(cop)
+                dst.write(header.endLine)
                 dst.write("\n")
             dst.write(src.read())
 
         dst.close()
         src.close()
-        if srcfile == dstfile:
-            copyfile(tmp, dstfile)
