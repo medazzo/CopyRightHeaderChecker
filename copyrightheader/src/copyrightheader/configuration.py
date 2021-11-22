@@ -1,7 +1,12 @@
+import logging
 import os
+import re
+import tempfile
 from shutil import copyfile
 
 from copyrightheader.header import Header
+
+_logger = logging.getLogger(__name__)
 
 
 class Conf:
@@ -9,7 +14,6 @@ class Conf:
 
     def __init__(
         self,
-        report=True,
         update=True,
         forceOldHeader=True,
         nameCompany="",
@@ -24,7 +28,6 @@ class Conf:
         self.countryCompany = countryCompany
         self.addressCompany = addressCompany
         self.nameCompany = nameCompany
-        self.reporting = report
         self.updateFiles = update
         self.shebangCheck = True
         self.forceOldHeader = forceOldHeader
@@ -107,35 +110,31 @@ class Conf:
             )
 
     def short_info(self):
-        print("")
-        print("----------------------------------------")
-        print("* Reporting is enabled : ", self.reporting)
-        print("* Files are updated    : ", self.updateFiles)
-        print("* Check Shebang        : ", self.shebangCheck)
-        print("* Warn on old Header   : ", self.warnOldHeader)
-        print("* force Old Header     : ", self.forceOldHeader)
-        print("* Excluded Folders     : ", self.excludeDirs)
-        print("* Shebang List         : ", self.shebangs)
-        print("----------------------------------------")
-        print("* Company Name         : ", self.nameCompany)
-        print("* Company Year         : ", self.yearCompany)
-        print("* Company Address      : ", self.addressCompany)
-        print("* Company Country      : ", self.countryCompany)
-        print("----------------------------------------")
-        print("")
+        _logger.info("")
+        _logger.info("----------------------------------------")
+        _logger.info("* Files are updated    : %s", self.updateFiles)
+        _logger.info("* Check Shebang        : %s", self.shebangCheck)
+        _logger.info("* Warn on old Header   : %s", self.warnOldHeader)
+        _logger.info("* force Old Header     : %s", self.forceOldHeader)
+        _logger.info("* Excluded Folders     : %s", self.excludeDirs)
+        _logger.info("* Shebang List         : %s", self.shebangs)
+        _logger.info("----------------------------------------")
+        _logger.info("* Company Name         : %s", self.nameCompany)
+        _logger.info("* Company Year         : %s", self.yearCompany)
+        _logger.info("* Company Address      : %s", self.addressCompany)
+        _logger.info("* Company Country      : %s", self.countryCompany)
+        _logger.info("----------------------------------------")
+        _logger.info("")
 
     def info(self):
         self.short_info()
         for h in self.headers:
             h.info()
 
-    def checkfileShebang(self, filename):
+    def checkfileShebang(self, fileData):
         """return true if file has a shebang"""
-        infile = open(filename)
-        firstLine = infile.readline()
-        infile.close()
         for she in self.shebangs:
-            if firstLine.startswith(she):
+            if fileData.startswith(she):
                 return True
         return False
 
@@ -168,30 +167,40 @@ class Conf:
 
         self.newCopyrightHeader = copyright
 
-    def ApplyCopyright(self, oldfile, newfile, header):
-        dst = open(newfile, "w")
-        isSheb = self.checkfileShebang(oldfile)
-        src = open(oldfile)
-        newheader = self.newCopyrightHeader
-        if isSheb:
-            line = src.readline()
-            dst.write(line)
-            for cop in newheader:
-                dst.write(header.startLine)
-                dst.write(cop)
-                dst.write(header.endLine)
-                dst.write("\n")
-            # continue copy src file
-            while line:
-                line = src.readline()
-                dst.write(line)
-        else:
-            for cop in newheader:
-                dst.write(header.startLine)
-                dst.write(cop)
-                dst.write(header.endLine)
-                dst.write("\n")
-            dst.write(src.read())
+    def stripcomments(self, text):
+        return re.sub("//.*?(\r\n?|\n)|/\\*.*?\\*/", "", text, flags=re.S)
 
-        dst.close()
-        src.close()
+    def ApplyCopyright(self, oldfile, newfile, header, forceNewHeader=False):
+        newheader = self.newCopyrightHeader
+        fd, tmpFilename = tempfile.mkstemp()
+        line = ""
+        try:
+            with os.fdopen(fd, "w") as dst:
+                with open(oldfile) as src:
+                    data = src.readlines()
+                    index = 0
+                    hd = ""
+                    if self.checkfileShebang(data[0]):
+                        line = data[0]
+                        index = 1
+                    if forceNewHeader:
+                        hd = self.stripcomments("".join(data[index:10]))
+                    # construction
+                    if line:
+                        dst.write(line)
+                        dst.write("\n")
+                    for cop in newheader:
+                        dst.write(header.startLine)
+                        dst.write(cop)
+                        dst.write(header.endLine)
+                        dst.write("\n")
+                    if forceNewHeader:
+                        dst.write(hd)
+                    else:
+                        dst.write("".join(data[index:10]))
+                    dst.write("".join(data[10:]))
+                    dst.close()
+                    src.close()
+                    copyfile(tmpFilename, newfile)
+        finally:
+            os.remove(tmpFilename)

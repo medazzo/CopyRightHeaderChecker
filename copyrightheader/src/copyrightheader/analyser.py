@@ -1,8 +1,11 @@
+import logging
 import ntpath
 import os
 import time
 
 from copyrightheader.header import Header
+
+_logger = logging.getLogger(__name__)
 
 
 class Analyser:
@@ -22,29 +25,31 @@ class Analyser:
 
     def process(self):
         """Process and start copyright header checks"""
-        print("- - - - - - -  Analyse - - - - - - -")
+        _logger.info("- - - - - - -  Analyse - - - - - - -")
         start = time.time()
         self.FindFiles()
         end = time.time()
         took = end - start
-        print("- - - - - - -  Analyse - - took %.4f sec -" % took)
-        print("- - - - - - -  Process - - - - - - -")
+        _logger.info("- - - - - - -  Analyse - - took %.4f sec -", took)
+        _logger.info("- - - - - - -  Process - - - - - - -")
         start = time.time()
         self.ApplyNewHeader()
         end = time.time()
         took = end - start
-        print("- - - - - - -  Process - - took %.4f sec -" % took)
+        _logger.info("- - - - - - -  Process - - took %.4f sec -", took)
 
     def ApplyNewHeader(self):
         """will apply new Copyright on array of files into OutDir with Same tree as original"""
         self.conf.GenerateNewCopyright()
-        print("- -  we will use Header :")
+        _logger.info("- -  we will use Header :")
         for w in self.conf.newCopyrightHeader:
-            print(">", w, "<")
-        print("- - ")
+            _logger.info(">%s<", w)
+        _logger.info("- - ")
         filesUpdated = 0
+        forceNewHeader = False
         for h in self.conf.headers:
             for x in h.filesManaged:
+                forceNewHeader = False
                 if self.dryRun:
                     p = os.path.dirname(x)
                     while p.startswith("../"):
@@ -59,10 +64,17 @@ class Analyser:
                         os.makedirs(nbase)
                 else:
                     nfile = x
-
-                self.conf.ApplyCopyright(x, nfile, h)
+                if (
+                    x in self.filesAlreadyCopyright
+                    and self.conf.forceOldHeader
+                ):
+                    _logger.warn(
+                        "- - => %s : Force removal of old Header !", format(x)
+                    )
+                    forceNewHeader = True
+                self.conf.ApplyCopyright(x, nfile, h, forceNewHeader)
                 filesUpdated = filesUpdated + 1
-        print("  - - -	=> ", format(filesUpdated), " files are updated ")
+        _logger.info("  - - -	=> %s files are updated ", format(filesUpdated))
 
     def checkfileCopyright(self, filename):
         """return true if file has already a Copyright in first X lines"""
@@ -90,24 +102,21 @@ class Analyser:
                         break
                 # not Headers suitable for this file
                 if not found:
-                    print(
-                        " ! ==> Cannot find Header for file --> ",
+                    _logger.warn(
+                        " ! ==> Cannot find Header for file --> %s",
                         format(sfileN),
                     )
                     self.filesUnsupported.append(sfileN)
         for h in self.conf.headers:
-            print("   - ", len(h.filesManaged), "   ", h.brief, " files.")
-        print(
-            "  - - -	! ",
+            _logger.info("   - %s   %s  files.", len(h.filesManaged), h.brief)
+        _logger.info(
+            "  - - -	! %s files are already with a Copyright Headers :",
             len(self.filesAlreadyCopyright),
-            " files are already with a Copyright Headers :",
         )
         for x in self.filesAlreadyCopyright:
-            print("   - ", x)
-        print(
-            "  - - -	! ",
-            len(self.filesUnsupported),
-            " files are Unsupported :",
+            _logger.info("   - %s", x)
+        _logger.info(
+            "  - - -	! %s files are Unsupported :", len(self.filesUnsupported)
         )
         for x in self.filesUnsupported:
-            print("   - ", x)
+            _logger.info("   - %s", x)

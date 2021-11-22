@@ -47,7 +47,7 @@ def setup_logging(loglevel):
     Args:
       loglevel (int): minimum loglevel for emitting messages
     """
-    logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
+    logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message) s"
     logging.basicConfig(
         level=loglevel,
         stream=sys.stdout,
@@ -89,13 +89,20 @@ def parse_args(args):
         required=True,
         help="print informations",
     )
+    process_info.add_argument(
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="Show more logs",
+    )
     process_parser = subparsers.add_parser("process", help="process checker")
     process_parser.add_argument(
-        "-r",
-        "--report",
-        dest="report",
+        "-v",
+        "--verbose",
+        dest="verbose",
         action="store_true",
-        help="print a detailed report for what has done",
+        help="Show more logs",
     )
     process_parser.add_argument(
         "-u",
@@ -151,7 +158,11 @@ def parse_args(args):
 
 def main(args):
     args = parse_args(args)
-    setup_logging(logging.DEBUG)
+    if args.verbose:
+        loglev = logging.DEBUG
+    else:
+        loglev = logging.INFO
+    setup_logging(loglev)
     if hasattr(args, "display"):
         if args.display == "all":
             Conf().info()
@@ -160,7 +171,6 @@ def main(args):
     else:
         _logger.debug("Starting calculations...")
         conf = Conf(
-            args.report,
             args.update,
             args.forceOldHeader,
             args.nameCompany,
