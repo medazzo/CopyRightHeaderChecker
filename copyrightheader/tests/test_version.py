@@ -1,6 +1,6 @@
 import pytest
 
-from copyrightheader.VERSION import version
+from copyrightheader._version import version
 
 __author__ = "Mohamed Azzouni"
 __copyright__ = "Mohamed Azzouni"

@@ -10,10 +10,10 @@ from setuptools import setup
 
 if __name__ == "__main__":
     try:
-        setup(use_scm_version={ "write_to": "copyrightheader/src/copyrightheader/VERSION.py",
+        setup(use_scm_version={ "write_to": "copyrightheader/src/copyrightheader/_version.py",
                                 "relative_to": __file__,
                                 "root": "..",
-                                "version_scheme": "no-guess-dev"})
+                                "version_scheme": "guess-next-dev"})
     except:  # noqa
         print(
             "\n\nAn error occurred while building the project, "
