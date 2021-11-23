@@ -33,7 +33,7 @@ __copyright__ = "Mohamed Azzouni"
 __license__ = "MIT"
 
 _logger = logging.getLogger(__name__)
-
+_logger.propagate = True
 
 # ---- CLI ----
 # The functions defined in this section are wrappers around the main Python
@@ -164,12 +164,12 @@ def main(args):
         loglev = logging.INFO
     setup_logging(loglev)
     if hasattr(args, "display"):
+        _logger.debug("Printing some informations ..")
         if args.display == "all":
             Conf().info()
         else:
             Conf().short_info()
-    else:
-        _logger.debug("Starting calculations...")
+    else:        
         conf = Conf(
             args.update,
             args.forceOldHeader,
@@ -182,8 +182,9 @@ def main(args):
         conf.short_info()
         dryRun = not args.update
         analyser = Analyser(args.inputFolder, dryRun, conf)
+        _logger.debug("Starting Working on folder %s",args.inputFolder)
         analyser.process()
-        _logger.info("Script ends here")
+        _logger.debug("The working is done")
 
 
 def run():

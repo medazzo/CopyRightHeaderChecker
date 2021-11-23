@@ -6,7 +6,7 @@ import time
 from copyrightheader.header import Header
 
 _logger = logging.getLogger(__name__)
-
+_logger.propagate = True
 
 class Analyser:
     """Header class"""
@@ -68,7 +68,7 @@ class Analyser:
                     x in self.filesAlreadyCopyright
                     and self.conf.forceOldHeader
                 ):
-                    _logger.warn(
+                    _logger.warning(
                         "- - => %s : Force removal of old Header !", format(x)
                     )
                     forceNewHeader = True
@@ -102,7 +102,7 @@ class Analyser:
                         break
                 # not Headers suitable for this file
                 if not found:
-                    _logger.warn(
+                    _logger.warning(
                         " ! ==> Cannot find Header for file --> %s",
                         format(sfileN),
                     )

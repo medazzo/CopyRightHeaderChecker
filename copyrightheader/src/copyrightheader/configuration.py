@@ -7,7 +7,7 @@ from shutil import copyfile
 from copyrightheader.header import Header
 
 _logger = logging.getLogger(__name__)
-
+_logger.propagate = True
 
 class Conf:
     """Configuration class"""
