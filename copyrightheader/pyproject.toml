@@ -1,8 +1,10 @@
 [build-system]
 # AVOID CHANGING REQUIRES: IT WILL BE UPDATED BY PYSCAFFOLD!
-requires = ["setuptools>=46.1.0", "setuptools_scm[toml]>=5", "wheel"]
+requires = ["setuptools>=46.1.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
-# See configuration details in https://github.com/pypa/setuptools_scm
-version_scheme = "no-guess-dev"
+write_to = "copyrightheader/src/copyrightheader/_version.py"
+root = ".."
+relative_to = "__file__"
+version_scheme = "guess-next-dev"
