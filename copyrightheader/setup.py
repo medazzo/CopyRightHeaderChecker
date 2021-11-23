@@ -11,7 +11,8 @@ from setuptools import setup
 if __name__ == "__main__":
     try:
         setup(use_scm_version={ "write_to": "copyrightheader/src/copyrightheader/VERSION.py",
-                                "root": "../",
+                                "relative_to": __file__,
+                                "root": "..",
                                 "version_scheme": "no-guess-dev"})
     except:  # noqa
         print(
